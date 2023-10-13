@@ -621,3 +621,35 @@ def find_kgt(colist):
             matches.append(col)
 
     return matches
+
+def find_high_correlation(df, threshold=0.95): 
+    """
+    JVG: This assumes that the geochemical dataframe is wide and each row is a single assay analysis.
+    Occasionally, there will be one parameter that perfectly correlates with another parameter due to
+    an error in the EDD generation or in subsequent data handling that copies results for one parameter
+    as the results for another parameter.
+
+    Find high correlation between columns in a DataFrame.
+
+    Parameters:
+        df (pandas.DataFrame): The DataFrame to analyze.
+        threshold (float): The correlation threshold to consider as high (default is 0.95).
+
+    Returns:
+        List of tuples: Each tuple contains the names of the highly correlated columns and their correlation value.
+    """
+    # Create a correlation matrix. TODO. JVG: Reduce this just to the geochemical parameters?
+    correlation_matrix = df.corr()
+
+    # Find highly correlated pairs of columns. TODO. JVG: Best way to flag this for the person running the script?
+    high_corr_pairs = []
+    for i in range(len(correlation_matrix.columns)):
+        for j in range(i + 1, len(correlation_matrix.columns)):
+            col1 = correlation_matrix.columns[i]
+            col2 = correlation_matrix.columns[j]
+            correlation = correlation_matrix.iloc[i, j]
+
+            if abs(correlation) >= threshold:
+                high_corr_pairs.append((col1, col2, correlation))
+
+    return high_corr_pairs
